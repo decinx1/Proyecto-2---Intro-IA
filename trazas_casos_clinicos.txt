@@ -1,0 +1,413 @@
+╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ SISTEMA EXPERTO DE DIAGNÓSTICO · Motor de inferencia con cláusulas de Horn                                       ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+AUDITORÍA DE LA BASE DE CONOCIMIENTO
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Archivo               base_conocimiento.json
+  Reglas                115
+  Hechos base           42
+  Objetivos finales     11
+  Profundidad máxima    4
+
+  ✔ Sin identificadores duplicados
+  ✔ Sin ciclos (aciclicidad)
+  ✔ Todas las reglas son alcanzables (sin islas)
+  ✔ Todos los objetivos finales tienen profundidad ≥ 4
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 1 de 7 · Choque pediátrico                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Profundidad de 4 niveles: una regla por nivel
+  Síntomas (Δ)  Manos_Frias, Relleno_Capilar_Mayor_3s, Pulso_Debil_Rapido, Contexto_Pediatrico
+  Objetivo (α)  Alerta_Roja_Circulatoria
+  Esperado      demostrable
+
+  ▶ Encadenamiento hacia adelante   ✔ DEMOSTRADO  (4 reglas disparadas, objetivo en el nivel 4)
+
+     Paso  Nivel  Regla  Antecedentes                                                      Hecho nuevo
+     ────  ─────  ─────  ────────────────────────────────────────────────────────────────  ────────────────────────
+        1      1  R27    Manos_Frias ∧ Pulso_Debil_Rapido ∧ Relleno_Capilar_Mayor_3s       Signo_Choque_Etat
+        2      2  R58    Signo_Choque_Etat                                                 Sindrome_Choque_Etat
+        3      3  R86    Contexto_Pediatrico ∧ Sindrome_Choque_Etat                        Choque
+        4      4  R102   Choque                                                            Alerta_Roja_Circulatoria
+
+  ▶ Encadenamiento hacia atrás      ✔ DEMOSTRADO  (4 reglas intentadas, 4 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+        1. R27   Manos_Frias ∧ Pulso_Debil_Rapido ∧ Relleno_Capilar_Mayor_3s  →  Signo_Choque_Etat
+        2. R58   Signo_Choque_Etat  →  Sindrome_Choque_Etat
+        3. R86   Contexto_Pediatrico ∧ Sindrome_Choque_Etat  →  Choque
+        4. R102  Choque  →  Alerta_Roja_Circulatoria
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Alerta_Roja_Circulatoria  ✔ demostrado con R102
+     └─ R102: Choque  ✔
+        └─ Choque  ✔ demostrado con R86
+           └─ R86: Contexto_Pediatrico ∧ Sindrome_Choque_Etat  ✔
+              ├─ Contexto_Pediatrico  ✔ hecho observado
+              └─ Sindrome_Choque_Etat  ✔ demostrado con R58
+                 └─ R58: Signo_Choque_Etat  ✔
+                    └─ Signo_Choque_Etat  ✔ demostrado con R27
+                       └─ R27: Manos_Frias ∧ Pulso_Debil_Rapido ∧ Relleno_Capilar_Mayor_3s  ✔
+                          ├─ Manos_Frias  ✔ hecho observado
+                          ├─ Pulso_Debil_Rapido  ✔ hecho observado
+                          └─ Relleno_Capilar_Mayor_3s  ✔ hecho observado
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 2 de 7 · Neumonía sin diferenciador                                                                         │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Fallo por ausencia de Dolor_Toracico_Pleuritico
+  Síntomas (Δ)  Fiebre, Tos, Dificultad_Respiratoria
+  Objetivo (α)  Neumonia
+  Esperado      no demostrable
+
+  ▶ Encadenamiento hacia adelante   ✘ NO SE DERIVA  (4 reglas disparadas, punto fijo en la ola 2)
+
+     Paso  Nivel  Regla  Antecedentes                                         Hecho nuevo
+     ────  ─────  ─────  ───────────────────────────────────────────────────  ─────────────────────────────────────
+        1      1  R1     Fiebre ∧ Tos                                         Cuadro_Febril_Respiratorio
+        2      1  R4     Dificultad_Respiratoria ∧ Tos                        Compromiso_Respiratorio
+        3      1  R5     Dificultad_Respiratoria ∧ Fiebre                     Disnea_Febril
+        4      1  R8     Dificultad_Respiratoria ∧ Fiebre ∧ Tos               Cuadro_Respiratorio_Febril_Con_Disnea
+
+  ▶ Encadenamiento hacia atrás      ✘ NO SE DERIVA  (4 reglas intentadas, 0 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+       (sin derivación: objetivo no demostrado o ya era un hecho inicial)
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Neumonia  ✘ no demostrable
+     └─ R76: Dificultad_Respiratoria ∧ Neumonico_Sospechado  ✘
+        ├─ Dificultad_Respiratoria  ✔ hecho observado
+        └─ Neumonico_Sospechado  ✘ no demostrable
+           └─ R55: Cuadro_Respiratorio_Febril_Con_Disnea ∧ Febril_Pleuritico  ✘
+              ├─ Cuadro_Respiratorio_Febril_Con_Disnea  ✔ demostrado con R8
+              │  └─ R8: Dificultad_Respiratoria ∧ Fiebre ∧ Tos  ✔
+              │     ├─ Dificultad_Respiratoria  ✔ hecho observado
+              │     ├─ Fiebre  ✔ hecho observado
+              │     └─ Tos  ✔ hecho observado
+              └─ Febril_Pleuritico  ✘ no demostrable
+                 └─ R37: Dolor_Toracico_Pleuritico ∧ Fiebre  ✘
+                    └─ Dolor_Toracico_Pleuritico  ✘ no observado y ninguna regla lo concluye
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 3 de 7 · Neumonía con alerta roja                                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Diagnóstico inferido + síntoma crítico → estado de alerta
+  Síntomas (Δ)  Fiebre, Tos, Dificultad_Respiratoria, Dolor_Toracico_Pleuritico, Dificultad_Respiratoria_Severa
+  Objetivo (α)  Alerta_Roja_Respiratoria
+  Esperado      demostrable
+
+  ▶ Encadenamiento hacia adelante   ✔ DEMOSTRADO  (10 reglas disparadas, objetivo en el nivel 4)
+
+     Paso  Nivel  Regla  Antecedentes                                         Hecho nuevo
+     ────  ─────  ─────  ───────────────────────────────────────────────────  ─────────────────────────────────────
+        1      1  R1     Fiebre ∧ Tos                                         Cuadro_Febril_Respiratorio
+        2      1  R4     Dificultad_Respiratoria ∧ Tos                        Compromiso_Respiratorio
+        3      1  R5     Dificultad_Respiratoria ∧ Fiebre                     Disnea_Febril
+        4      1  R8     Dificultad_Respiratoria ∧ Fiebre ∧ Tos               Cuadro_Respiratorio_Febril_Con_Disnea
+        5      1  R25    Dificultad_Respiratoria_Severa                       Disnea_Severa
+        6      1  R37    Dolor_Toracico_Pleuritico ∧ Fiebre                   Febril_Pleuritico
+        7      2  R55    Cuadro_Respiratorio_Febril_Con_Disnea ∧              Neumonico_Sospechado
+                         Febril_Pleuritico
+        8      2  R65    Disnea_Severa                                        Insuficiencia_Respiratoria_Potencial
+        9      3  R76    Dificultad_Respiratoria ∧ Neumonico_Sospechado       Neumonia
+       10      4  R95    Disnea_Severa ∧ Neumonia                             Alerta_Roja_Respiratoria
+
+  ▶ Encadenamiento hacia atrás      ✔ DEMOSTRADO  (6 reglas intentadas, 6 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+        1. R25   Dificultad_Respiratoria_Severa  →  Disnea_Severa
+        2. R8    Dificultad_Respiratoria ∧ Fiebre ∧ Tos  →  Cuadro_Respiratorio_Febril_Con_Disnea
+        3. R37   Dolor_Toracico_Pleuritico ∧ Fiebre  →  Febril_Pleuritico
+        4. R55   Cuadro_Respiratorio_Febril_Con_Disnea ∧ Febril_Pleuritico  →  Neumonico_Sospechado
+        5. R76   Dificultad_Respiratoria ∧ Neumonico_Sospechado  →  Neumonia
+        6. R95   Disnea_Severa ∧ Neumonia  →  Alerta_Roja_Respiratoria
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Alerta_Roja_Respiratoria  ✔ demostrado con R95
+     └─ R95: Disnea_Severa ∧ Neumonia  ✔
+        ├─ Disnea_Severa  ✔ demostrado con R25
+        │  └─ R25: Dificultad_Respiratoria_Severa  ✔
+        │     └─ Dificultad_Respiratoria_Severa  ✔ hecho observado
+        └─ Neumonia  ✔ demostrado con R76
+           └─ R76: Dificultad_Respiratoria ∧ Neumonico_Sospechado  ✔
+              ├─ Dificultad_Respiratoria  ✔ hecho observado
+              └─ Neumonico_Sospechado  ✔ demostrado con R55
+                 └─ R55: Cuadro_Respiratorio_Febril_Con_Disnea ∧ Febril_Pleuritico  ✔
+                    ├─ Cuadro_Respiratorio_Febril_Con_Disnea  ✔ demostrado con R8
+                    │  └─ R8: Dificultad_Respiratoria ∧ Fiebre ∧ Tos  ✔
+                    │     ├─ Dificultad_Respiratoria  ✔ hecho observado
+                    │     ├─ Fiebre  ✔ hecho observado
+                    │     └─ Tos  ✔ hecho observado
+                    └─ Febril_Pleuritico  ✔ demostrado con R37
+                       └─ R37: Dolor_Toracico_Pleuritico ∧ Fiebre  ✔
+                          ├─ Dolor_Toracico_Pleuritico  ✔ hecho observado
+                          └─ Fiebre  ✔ hecho observado
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 4 de 7 · Exacerbación de asma                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Hecho diferenciador Antecedente_Asma (comparar con el caso 5)
+  Síntomas (Δ)  Tos, Dificultad_Respiratoria, Sibilancias, Dificultad_Respiratoria_Severa, Antecedente_Asma
+  Objetivo (α)  Alerta_Roja_Respiratoria
+  Esperado      demostrable
+
+  ▶ Encadenamiento hacia adelante   ✔ DEMOSTRADO  (7 reglas disparadas, objetivo en el nivel 4)
+
+     Paso  Nivel  Regla  Antecedentes                                          Hecho nuevo
+     ────  ─────  ─────  ────────────────────────────────────────────────────  ────────────────────────────────────
+        1      1  R4     Dificultad_Respiratoria ∧ Tos                         Compromiso_Respiratorio
+        2      1  R25    Dificultad_Respiratoria_Severa                        Disnea_Severa
+        3      1  R36    Dificultad_Respiratoria ∧ Sibilancias                 Broncoespasmo
+        4      2  R54    Broncoespasmo ∧ Compromiso_Respiratorio               Obstructivo_Bronquial
+        5      2  R65    Disnea_Severa                                         Insuficiencia_Respiratoria_Potencial
+        6      3  R77    Antecedente_Asma ∧ Obstructivo_Bronquial              Exacerbacion_Asma
+        7      4  R97    Disnea_Severa ∧ Exacerbacion_Asma                     Alerta_Roja_Respiratoria
+
+  ▶ Encadenamiento hacia atrás      ✔ DEMOSTRADO  (14 reglas intentadas, 6 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+        1. R25   Dificultad_Respiratoria_Severa  →  Disnea_Severa
+        2. R36   Dificultad_Respiratoria ∧ Sibilancias  →  Broncoespasmo
+        3. R4    Dificultad_Respiratoria ∧ Tos  →  Compromiso_Respiratorio
+        4. R54   Broncoespasmo ∧ Compromiso_Respiratorio  →  Obstructivo_Bronquial
+        5. R77   Antecedente_Asma ∧ Obstructivo_Bronquial  →  Exacerbacion_Asma
+        6. R97   Disnea_Severa ∧ Exacerbacion_Asma  →  Alerta_Roja_Respiratoria
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Alerta_Roja_Respiratoria  ✔ demostrado con R97
+     ├─ R95: Disnea_Severa ∧ Neumonia  ✘
+     │  ├─ Disnea_Severa  ✔ demostrado con R25
+     │  │  └─ R25: Dificultad_Respiratoria_Severa  ✔
+     │  │     └─ Dificultad_Respiratoria_Severa  ✔ hecho observado
+     │  └─ Neumonia  ✘ no demostrable
+     │     └─ R76: Dificultad_Respiratoria ∧ Neumonico_Sospechado  ✘
+     │        ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │        └─ Neumonico_Sospechado  ✘ no demostrable
+     │           └─ R55: Cuadro_Respiratorio_Febril_Con_Disnea ∧ Febril_Pleuritico  ✘
+     │              └─ Cuadro_Respiratorio_Febril_Con_Disnea  ✘ no demostrable
+     │                 └─ R8: Dificultad_Respiratoria ∧ Fiebre ∧ Tos  ✘
+     │                    ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │                    └─ Fiebre  ✘ no observado y ninguna regla lo concluye
+     ├─ R96: Influenza ∧ Signo_Hipoxia_Critica  ✘
+     │  └─ Influenza  ✘ no demostrable
+     │     └─ R73: Pseudogripal ∧ Tos  ✘
+     │        └─ Pseudogripal  ✘ no demostrable
+     │           └─ R52: Febril_Mialgico ∧ Malestar_Febril  ✘
+     │              └─ Febril_Mialgico  ✘ no demostrable
+     │                 └─ R40: Fiebre ∧ Mialgias  ✘
+     │                    └─ Fiebre  ✘ ya refutado (memoria)
+     └─ R97: Disnea_Severa ∧ Exacerbacion_Asma  ✔
+        ├─ Disnea_Severa  ✔ ya demostrado (memoria)
+        └─ Exacerbacion_Asma  ✔ demostrado con R77
+           └─ R77: Antecedente_Asma ∧ Obstructivo_Bronquial  ✔
+              ├─ Antecedente_Asma  ✔ hecho observado
+              └─ Obstructivo_Bronquial  ✔ demostrado con R54
+                 └─ R54: Broncoespasmo ∧ Compromiso_Respiratorio  ✔
+                    ├─ Broncoespasmo  ✔ demostrado con R36
+                    │  └─ R36: Dificultad_Respiratoria ∧ Sibilancias  ✔
+                    │     ├─ Dificultad_Respiratoria  ✔ hecho observado
+                    │     └─ Sibilancias  ✔ hecho observado
+                    └─ Compromiso_Respiratorio  ✔ demostrado con R4
+                       └─ R4: Dificultad_Respiratoria ∧ Tos  ✔
+                          ├─ Dificultad_Respiratoria  ✔ hecho observado
+                          └─ Tos  ✔ hecho observado
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 5 de 7 · EPOC sin hipoxia                                                                                   │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Sin signos de hipoxia la exacerbación de EPOC no genera alerta roja
+  Síntomas (Δ)  Tos, Dificultad_Respiratoria, Sibilancias, Dificultad_Respiratoria_Severa, Antecedente_EPOC
+  Objetivo (α)  Alerta_Roja_Respiratoria
+  Esperado      no demostrable
+
+  ▶ Encadenamiento hacia adelante   ✘ NO SE DERIVA  (6 reglas disparadas, punto fijo en la ola 4)
+
+     Paso  Nivel  Regla  Antecedentes                                          Hecho nuevo
+     ────  ─────  ─────  ────────────────────────────────────────────────────  ────────────────────────────────────
+        1      1  R4     Dificultad_Respiratoria ∧ Tos                         Compromiso_Respiratorio
+        2      1  R25    Dificultad_Respiratoria_Severa                        Disnea_Severa
+        3      1  R36    Dificultad_Respiratoria ∧ Sibilancias                 Broncoespasmo
+        4      2  R54    Broncoespasmo ∧ Compromiso_Respiratorio               Obstructivo_Bronquial
+        5      2  R65    Disnea_Severa                                         Insuficiencia_Respiratoria_Potencial
+        6      3  R78    Antecedente_EPOC ∧ Obstructivo_Bronquial              Exacerbacion_EPOC
+
+  ▶ Encadenamiento hacia atrás      ✘ NO SE DERIVA  (24 reglas intentadas, 0 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+       (sin derivación: objetivo no demostrado o ya era un hecho inicial)
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Alerta_Roja_Respiratoria  ✘ no demostrable
+     ├─ R95: Disnea_Severa ∧ Neumonia  ✘
+     │  ├─ Disnea_Severa  ✔ demostrado con R25
+     │  │  └─ R25: Dificultad_Respiratoria_Severa  ✔
+     │  │     └─ Dificultad_Respiratoria_Severa  ✔ hecho observado
+     │  └─ Neumonia  ✘ no demostrable
+     │     └─ R76: Dificultad_Respiratoria ∧ Neumonico_Sospechado  ✘
+     │        ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │        └─ Neumonico_Sospechado  ✘ no demostrable
+     │           └─ R55: Cuadro_Respiratorio_Febril_Con_Disnea ∧ Febril_Pleuritico  ✘
+     │              └─ Cuadro_Respiratorio_Febril_Con_Disnea  ✘ no demostrable
+     │                 └─ R8: Dificultad_Respiratoria ∧ Fiebre ∧ Tos  ✘
+     │                    ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │                    └─ Fiebre  ✘ no observado y ninguna regla lo concluye
+     ├─ R96: Influenza ∧ Signo_Hipoxia_Critica  ✘
+     │  └─ Influenza  ✘ no demostrable
+     │     └─ R73: Pseudogripal ∧ Tos  ✘
+     │        └─ Pseudogripal  ✘ no demostrable
+     │           └─ R52: Febril_Mialgico ∧ Malestar_Febril  ✘
+     │              └─ Febril_Mialgico  ✘ no demostrable
+     │                 └─ R40: Fiebre ∧ Mialgias  ✘
+     │                    └─ Fiebre  ✘ ya refutado (memoria)
+     ├─ R97: Disnea_Severa ∧ Exacerbacion_Asma  ✘
+     │  ├─ Disnea_Severa  ✔ ya demostrado (memoria)
+     │  └─ Exacerbacion_Asma  ✘ no demostrable
+     │     └─ R77: Antecedente_Asma ∧ Obstructivo_Bronquial  ✘
+     │        └─ Antecedente_Asma  ✘ no observado y ninguna regla lo concluye
+     ├─ R98: Exacerbacion_EPOC ∧ Signo_Hipoxia_Critica  ✘
+     │  ├─ Exacerbacion_EPOC  ✔ demostrado con R78
+     │  │  └─ R78: Antecedente_EPOC ∧ Obstructivo_Bronquial  ✔
+     │  │     ├─ Antecedente_EPOC  ✔ hecho observado
+     │  │     └─ Obstructivo_Bronquial  ✔ demostrado con R54
+     │  │        └─ R54: Broncoespasmo ∧ Compromiso_Respiratorio  ✔
+     │  │           ├─ Broncoespasmo  ✔ demostrado con R36
+     │  │           │  └─ R36: Dificultad_Respiratoria ∧ Sibilancias  ✔
+     │  │           │     ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │  │           │     └─ Sibilancias  ✔ hecho observado
+     │  │           └─ Compromiso_Respiratorio  ✔ demostrado con R4
+     │  │              └─ R4: Dificultad_Respiratoria ∧ Tos  ✔
+     │  │                 ├─ Dificultad_Respiratoria  ✔ hecho observado
+     │  │                 └─ Tos  ✔ hecho observado
+     │  └─ Signo_Hipoxia_Critica  ✘ no demostrable
+     │     └─ R21: Cianosis_Central  ✘
+     │        └─ Cianosis_Central  ✘ no observado y ninguna regla lo concluye
+     ├─ R99: Fallo_Respiratorio  ✘
+     │  └─ Fallo_Respiratorio  ✘ no demostrable
+     │     └─ R89: Insuficiencia_Respiratoria_Potencial ∧ Neurologico  ✘
+     │        ├─ Insuficiencia_Respiratoria_Potencial  ✔ demostrado con R65
+     │        │  └─ R65: Disnea_Severa  ✔
+     │        │     └─ Disnea_Severa  ✔ ya demostrado (memoria)
+     │        └─ Neurologico  ✘ no demostrable
+     │           └─ R28: Alteracion_Estado_Mental  ✘
+     │              └─ Alteracion_Estado_Mental  ✘ no observado y ninguna regla lo concluye
+     └─ R100: Hipotesis_Hipoxia_Critica  ✘
+        └─ Hipotesis_Hipoxia_Critica  ✘ no demostrable
+           └─ R90: Sindrome_Hipoxia_Critica  ✘
+              └─ Sindrome_Hipoxia_Critica  ✘ no demostrable
+                 └─ R66: Signo_Hipoxia_Critica  ✘
+                    └─ Signo_Hipoxia_Critica  ✘ ya refutado (memoria)
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 6 de 7 · Influenza                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Hecho diferenciador Mialgias
+  Síntomas (Δ)  Fiebre, Tos, Fatiga, Mialgias
+  Objetivo (α)  Influenza
+  Esperado      demostrable
+
+  ▶ Encadenamiento hacia adelante   ✔ DEMOSTRADO  (8 reglas disparadas, objetivo en el nivel 3)
+
+     Paso  Nivel  Regla  Antecedentes                                                Hecho nuevo
+     ────  ─────  ─────  ──────────────────────────────────────────────────────────  ──────────────────────────────
+        1      1  R1     Fiebre ∧ Tos                                                Cuadro_Febril_Respiratorio
+        2      1  R2     Fatiga ∧ Tos                                                Cuadro_Respiratorio_Con_Fatiga
+        3      1  R3     Fatiga ∧ Fiebre                                             Malestar_Febril
+        4      1  R7     Fatiga ∧ Fiebre ∧ Tos                                       Cuadro_Respiratorio_Sistemico
+        5      1  R40    Fiebre ∧ Mialgias                                           Febril_Mialgico
+        6      2  R45    Cuadro_Febril_Respiratorio ∧ Malestar_Febril                Respiratorio_Febril
+        7      2  R52    Febril_Mialgico ∧ Malestar_Febril                           Pseudogripal
+        8      3  R73    Pseudogripal ∧ Tos                                          Influenza
+
+  ▶ Encadenamiento hacia atrás      ✔ DEMOSTRADO  (4 reglas intentadas, 4 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+        1. R40   Fiebre ∧ Mialgias  →  Febril_Mialgico
+        2. R3    Fatiga ∧ Fiebre  →  Malestar_Febril
+        3. R52   Febril_Mialgico ∧ Malestar_Febril  →  Pseudogripal
+        4. R73   Pseudogripal ∧ Tos  →  Influenza
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Influenza  ✔ demostrado con R73
+     └─ R73: Pseudogripal ∧ Tos  ✔
+        ├─ Pseudogripal  ✔ demostrado con R52
+        │  └─ R52: Febril_Mialgico ∧ Malestar_Febril  ✔
+        │     ├─ Febril_Mialgico  ✔ demostrado con R40
+        │     │  └─ R40: Fiebre ∧ Mialgias  ✔
+        │     │     ├─ Fiebre  ✔ hecho observado
+        │     │     └─ Mialgias  ✔ hecho observado
+        │     └─ Malestar_Febril  ✔ demostrado con R3
+        │        └─ R3: Fatiga ∧ Fiebre  ✔
+        │           ├─ Fatiga  ✔ hecho observado
+        │           └─ Fiebre  ✔ hecho observado
+        └─ Tos  ✔ hecho observado
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ CASO 7 de 7 · Resfriado común                                                                                    │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ilustra       Hechos diferenciadores Rinorrea + Estornudos
+  Síntomas (Δ)  Tos, Fatiga, Rinorrea, Estornudos
+  Objetivo (α)  Resfriado_Comun
+  Esperado      demostrable
+
+  ▶ Encadenamiento hacia adelante   ✔ DEMOSTRADO  (4 reglas disparadas, objetivo en el nivel 3)
+
+     Paso  Nivel  Regla  Antecedentes                                                Hecho nuevo
+     ────  ─────  ─────  ──────────────────────────────────────────────────────────  ──────────────────────────────
+        1      1  R2     Fatiga ∧ Tos                                                Cuadro_Respiratorio_Con_Fatiga
+        2      1  R39    Estornudos ∧ Rinorrea                                       Nasal
+        3      2  R51    Cuadro_Respiratorio_Con_Fatiga ∧ Nasal                      Catarral
+        4      3  R74    Catarral ∧ Rinorrea                                         Resfriado_Comun
+
+  ▶ Encadenamiento hacia atrás      ✔ DEMOSTRADO  (4 reglas intentadas, 4 en la demostración)
+
+     Derivación  (de síntomas a objetivo)
+        1. R2    Fatiga ∧ Tos  →  Cuadro_Respiratorio_Con_Fatiga
+        2. R39   Estornudos ∧ Rinorrea  →  Nasal
+        3. R51   Cuadro_Respiratorio_Con_Fatiga ∧ Nasal  →  Catarral
+        4. R74   Catarral ∧ Rinorrea  →  Resfriado_Comun
+
+     Árbol de búsqueda  (dirigido por el objetivo)
+     Resfriado_Comun  ✔ demostrado con R74
+     └─ R74: Catarral ∧ Rinorrea  ✔
+        ├─ Catarral  ✔ demostrado con R51
+        │  └─ R51: Cuadro_Respiratorio_Con_Fatiga ∧ Nasal  ✔
+        │     ├─ Cuadro_Respiratorio_Con_Fatiga  ✔ demostrado con R2
+        │     │  └─ R2: Fatiga ∧ Tos  ✔
+        │     │     ├─ Fatiga  ✔ hecho observado
+        │     │     └─ Tos  ✔ hecho observado
+        │     └─ Nasal  ✔ demostrado con R39
+        │        └─ R39: Estornudos ∧ Rinorrea  ✔
+        │           ├─ Estornudos  ✔ hecho observado
+        │           └─ Rinorrea  ✔ hecho observado
+        └─ Rinorrea  ✔ hecho observado
+
+  ✔ Ambos motores coinciden con el resultado esperado
+
+RESUMEN DE CASOS CLÍNICOS
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   #  Caso                        Objetivo                  Esp.  Adel.  Atrás  Disp.  Int.  Estado
+  ─────────────────────────────────────────────────────────────────────────────────────────────────
+   1  Choque pediátrico           Alerta_Roja_Circulatoria   ✔      ✔      ✔        4     4  OK
+   2  Neumonía sin diferenciador  Neumonia                   ✘      ✘      ✘        4     4  OK
+   3  Neumonía con alerta roja    Alerta_Roja_Respiratoria   ✔      ✔      ✔       10     6  OK
+   4  Exacerbación de asma        Alerta_Roja_Respiratoria   ✔      ✔      ✔        7    14  OK
+   5  EPOC sin hipoxia            Alerta_Roja_Respiratoria   ✘      ✘      ✘        6    24  OK
+   6  Influenza                   Influenza                  ✔      ✔      ✔        8     4  OK
+   7  Resfriado común             Resfriado_Comun            ✔      ✔      ✔        4     4  OK
+
+  7/7 casos correctos   (Disp.: disparos hacia adelante · Int.: reglas intentadas hacia atrás)

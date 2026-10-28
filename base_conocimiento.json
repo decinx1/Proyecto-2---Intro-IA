@@ -1,0 +1,1113 @@
+{
+  "descripcion": "Base de conocimiento con cláusulas de Horn para el diagnóstico de enfermedades.",
+  "formato": "antecedentes en conjunción -> consecuente; todas las entradas son hechos positivos.",
+  "total_reglas": 115,
+  "reglas_por_nivel": {
+    "_comment": "Niv 1 = hechos a signos; niv 2 = signos a síndromes; niv 3: síndromes a enfermedades; niv 4: enfermedades a subtipos, tratamientos o estados de alerta",
+    "1": 41,
+    "2": 28,
+    "3": 23,
+    "4": 23
+  },
+  "origen de los datos": "se obtuvieron relaciones entre síntomas y enfermedades a partir de un dataset de Kaggle, denominado Disease Symptomps and Patient Profile Dataset. Link: https://www.kaggle.com/datasets/uom190346a/disease-symptoms-and-patient-profile-dataset. Esto se complementó con datos generados por IA e información de triaje de la OMS",
+  "filas_dataset": 349,
+  "enfermedades_distintas_dataset": 116,
+  "columnas_dataset": [
+    "Disease",
+    "Fever",
+    "Cough",
+    "Fatigue",
+    "Difficulty Breathing",
+    "Age",
+    "Gender",
+    "Blood Pressure",
+    "Cholesterol Level",
+    "Outcome Variable"
+  ],
+  "advertencias": [
+    "El dataset es pequeño y presenta asociaciones ambiguas; no justifica inferir una enfermedad concreta solo por fiebre/tos/fatiga/disnea.",
+    "Los hechos diferenciadores clínicos adicionales deben recogerse explícitamente; no están presentes en el CSV.",
+    "Los criterios ETAT son pediátricos; el hecho contexto_pediatrico debe verificarse antes de interpretar una alerta pediátrica.",
+    "Las alertas rojas/amarillas son etiquetas pedagógicas inspiradas en OMS, no clasificación oficial IITT ni triaje colombiano.",
+    "La gravedad puede requerir atención inmediata sin esperar cuatro inferencias; un motor real debe priorizar signos críticos independientemente de la profundidad lógica.",
+    "Los síntomas observados del CSV son categóricos, no permite inferir choque sin signos adicionales."
+  ],
+  "normalizacion_dataset": {
+    "Fever=Yes": "Fiebre",
+    "Cough=Yes": "Tos",
+    "Fatigue=Yes": "Fatiga",
+    "Difficulty Breathing=Yes": "Dificultad_Respiratoria",
+    "Blood Pressure=Low": "Presion_Baja",
+    "Blood Pressure=High": "Presion_Alta",
+    "Cholesterol Level=High": "Colesterol_Alto",
+    "Age>=65": "Edad_65_Mas"
+  },
+  "fuentes": [
+    {
+      "tipo": "datos",
+      "referencia": "Disease_symptom_and_patient_profile_dataset.csv",
+      "uso": "variables observables y selección de hipótesis; no se asumen causalidades"
+    },
+    {
+      "tipo": "OMS",
+      "titulo": "Basic Emergency Care / ABCDE",
+      "url": "https://www.who.int/publications/i/item/basic-emergency-care-approach-to-the-acutely-ill-and-injured"
+    },
+    {
+      "tipo": "OMS",
+      "titulo": "Paediatric emergency triage, assessment and treatment",
+      "url": "https://www.who.int/publications/i/item/9789241510219"
+    },
+    {
+      "tipo": "OMS",
+      "titulo": "Interagency Integrated Triage Tool",
+      "url": "https://www.who.int/tools/triage"
+    }
+  ],
+  "hechos_base_permitidos": [
+    "Alteracion_Estado_Mental",
+    "Alteracion_Habla",
+    "Antecedente_Asma",
+    "Antecedente_EPOC",
+    "Cianosis_Central",
+    "Colesterol_Alto",
+    "Coma",
+    "Contexto_Pediatrico",
+    "Convulsiones_Activas",
+    "Debilidad_Unilateral",
+    "Diarrea",
+    "Dificultad_Respiratoria",
+    "Dificultad_Respiratoria_Severa",
+    "Dolor_Garganta",
+    "Dolor_Toracico_Opresivo",
+    "Dolor_Toracico_Pleuritico",
+    "Edad_65_Mas",
+    "Edema_Lengua",
+    "Estornudos",
+    "Estridor",
+    "Expectoracion",
+    "Fatiga",
+    "Fiebre",
+    "Hemorragia_Masiva",
+    "Jadeo_Agonal",
+    "Letargo",
+    "Manos_Frias",
+    "Mialgias",
+    "Obstruccion_Via_Aerea",
+    "Ojos_Hundidos",
+    "Pliegue_Cutaneo_Muy_Lento",
+    "Presion_Alta",
+    "Presion_Baja",
+    "Pulso_Debil_Rapido",
+    "Pulso_Rapido",
+    "Relleno_Capilar_Mayor_3s",
+    "Respiracion_Ausente",
+    "Rinorrea",
+    "Sibilancias",
+    "Sudoracion_Fria",
+    "Tos",
+    "Urticaria"
+  ],
+  "reglas": [
+    {
+      "id": "R1",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Tos"
+      ],
+      "consecuente": "Cuadro_Febril_Respiratorio"
+    },
+    {
+      "id": "R2",
+      "nivel": 1,
+      "antecedentes": [
+        "Tos",
+        "Fatiga"
+      ],
+      "consecuente": "Cuadro_Respiratorio_Con_Fatiga"
+    },
+    {
+      "id": "R3",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Fatiga"
+      ],
+      "consecuente": "Malestar_Febril"
+    },
+    {
+      "id": "R4",
+      "nivel": 1,
+      "antecedentes": [
+        "Tos",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Compromiso_Respiratorio"
+    },
+    {
+      "id": "R5",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Disnea_Febril"
+    },
+    {
+      "id": "R6",
+      "nivel": 1,
+      "antecedentes": [
+        "Fatiga",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Disnea_Con_Fatiga"
+    },
+    {
+      "id": "R7",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Tos",
+        "Fatiga"
+      ],
+      "consecuente": "Cuadro_Respiratorio_Sistemico"
+    },
+    {
+      "id": "R8",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Tos",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Cuadro_Respiratorio_Febril_Con_Disnea"
+    },
+    {
+      "id": "R9",
+      "nivel": 1,
+      "antecedentes": [
+        "Tos",
+        "Fatiga",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Compromiso_Respiratorio_Con_Fatiga"
+    },
+    {
+      "id": "R10",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Tos",
+        "Fatiga",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Cuadro_Respiratorio_Sistemico_Con_Disnea"
+    },
+    {
+      "id": "R11",
+      "nivel": 1,
+      "antecedentes": [
+        "Presion_Baja",
+        "Fatiga"
+      ],
+      "consecuente": "Hipotension_Sintomatica"
+    },
+    {
+      "id": "R13",
+      "nivel": 1,
+      "antecedentes": [
+        "Colesterol_Alto",
+        "Presion_Alta"
+      ],
+      "consecuente": "Riesgo_Cardiometabolico"
+    },
+    {
+      "id": "R14",
+      "nivel": 1,
+      "antecedentes": [
+        "Edad_65_Mas",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Disnea_Adulto_Mayor"
+    },
+    {
+      "id": "R15",
+      "nivel": 1,
+      "antecedentes": [
+        "Edad_65_Mas",
+        "Fatiga"
+      ],
+      "consecuente": "Fatiga_Adulto_Mayor"
+    },
+    {
+      "id": "R16",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Presion_Baja"
+      ],
+      "consecuente": "Fiebre_Con_Hipotension"
+    },
+    {
+      "id": "R17",
+      "nivel": 1,
+      "antecedentes": [
+        "Dificultad_Respiratoria",
+        "Presion_Baja"
+      ],
+      "consecuente": "Disnea_Con_Hipotension"
+    },
+    {
+      "id": "R18",
+      "nivel": 1,
+      "antecedentes": [
+        "Presion_Alta",
+        "Colesterol_Alto",
+        "Edad_65_Mas"
+      ],
+      "consecuente": "Riesgo_Cardiovascular_Elevado"
+    },
+    {
+      "id": "R21",
+      "nivel": 1,
+      "antecedentes": [
+        "Cianosis_Central"
+      ],
+      "consecuente": "Signo_Hipoxia_Critica"
+    },
+    {
+      "id": "R22",
+      "nivel": 1,
+      "antecedentes": [
+        "Respiracion_Ausente"
+      ],
+      "consecuente": "Apnea"
+    },
+    {
+      "id": "R23",
+      "nivel": 1,
+      "antecedentes": [
+        "Jadeo_Agonal"
+      ],
+      "consecuente": "Respiracion_Agonal"
+    },
+    {
+      "id": "R24",
+      "nivel": 1,
+      "antecedentes": [
+        "Obstruccion_Via_Aerea"
+      ],
+      "consecuente": "Obstruccion"
+    },
+    {
+      "id": "R25",
+      "nivel": 1,
+      "antecedentes": [
+        "Dificultad_Respiratoria_Severa"
+      ],
+      "consecuente": "Disnea_Severa"
+    },
+    {
+      "id": "R26",
+      "nivel": 1,
+      "antecedentes": [
+        "Estridor"
+      ],
+      "consecuente": "Signo_Estridor"
+    },
+    {
+      "id": "R27",
+      "nivel": 1,
+      "antecedentes": [
+        "Manos_Frias",
+        "Relleno_Capilar_Mayor_3s",
+        "Pulso_Debil_Rapido"
+      ],
+      "consecuente": "Signo_Choque_Etat"
+    },
+    {
+      "id": "R28",
+      "nivel": 1,
+      "antecedentes": [
+        "Alteracion_Estado_Mental"
+      ],
+      "consecuente": "Neurologico"
+    },
+    {
+      "id": "R29",
+      "nivel": 1,
+      "antecedentes": [
+        "Coma"
+      ],
+      "consecuente": "Signo_Coma"
+    },
+    {
+      "id": "R30",
+      "nivel": 1,
+      "antecedentes": [
+        "Convulsiones_Activas"
+      ],
+      "consecuente": "Convulsion"
+    },
+    {
+      "id": "R31",
+      "nivel": 1,
+      "antecedentes": [
+        "Diarrea",
+        "Ojos_Hundidos",
+        "Pliegue_Cutaneo_Muy_Lento"
+      ],
+      "consecuente": "Deshidratacion_ETAT_A"
+    },
+    {
+      "id": "R32",
+      "nivel": 1,
+      "antecedentes": [
+        "Diarrea",
+        "Letargo",
+        "Ojos_Hundidos"
+      ],
+      "consecuente": "Deshidratacion_ETAT_B"
+    },
+    {
+      "id": "R33",
+      "nivel": 1,
+      "antecedentes": [
+        "Diarrea",
+        "Letargo",
+        "Pliegue_Cutaneo_Muy_Lento"
+      ],
+      "consecuente": "Deshidratacion_ETAT_C"
+    },
+    {
+      "id": "R34",
+      "nivel": 1,
+      "antecedentes": [
+        "Hemorragia_Masiva"
+      ],
+      "consecuente": "Hemorragia"
+    },
+    {
+      "id": "R35",
+      "nivel": 1,
+      "antecedentes": [
+        "Presion_Baja",
+        "Pulso_Rapido",
+        "Relleno_Capilar_Mayor_3s"
+      ],
+      "consecuente": "Signo_Hipoperfusion"
+    },
+    {
+      "id": "R36",
+      "nivel": 1,
+      "antecedentes": [
+        "Dificultad_Respiratoria",
+        "Sibilancias"
+      ],
+      "consecuente": "Broncoespasmo"
+    },
+    {
+      "id": "R37",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Dolor_Toracico_Pleuritico"
+      ],
+      "consecuente": "Febril_Pleuritico"
+    },
+    {
+      "id": "R38",
+      "nivel": 1,
+      "antecedentes": [
+        "Tos",
+        "Expectoracion"
+      ],
+      "consecuente": "Tos_Productiva"
+    },
+    {
+      "id": "R39",
+      "nivel": 1,
+      "antecedentes": [
+        "Rinorrea",
+        "Estornudos"
+      ],
+      "consecuente": "Nasal"
+    },
+    {
+      "id": "R40",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Mialgias"
+      ],
+      "consecuente": "Febril_Mialgico"
+    },
+    {
+      "id": "R41",
+      "nivel": 1,
+      "antecedentes": [
+        "Fiebre",
+        "Dolor_Garganta"
+      ],
+      "consecuente": "Faringeo_Febril"
+    },
+    {
+      "id": "R42",
+      "nivel": 1,
+      "antecedentes": [
+        "Debilidad_Unilateral",
+        "Alteracion_Habla"
+      ],
+      "consecuente": "Focal_Neurologico"
+    },
+    {
+      "id": "R43",
+      "nivel": 1,
+      "antecedentes": [
+        "Dolor_Toracico_Opresivo",
+        "Sudoracion_Fria"
+      ],
+      "consecuente": "Dolor_Toracico_Alarma"
+    },
+    {
+      "id": "R44",
+      "nivel": 1,
+      "antecedentes": [
+        "Urticaria",
+        "Edema_Lengua"
+      ],
+      "consecuente": "Reaccion_Alergica_Via_Aerea"
+    },
+    {
+      "id": "R45",
+      "nivel": 2,
+      "antecedentes": [
+        "Cuadro_Febril_Respiratorio",
+        "Malestar_Febril"
+      ],
+      "consecuente": "Respiratorio_Febril"
+    },
+    {
+      "id": "R46",
+      "nivel": 2,
+      "antecedentes": [
+        "Compromiso_Respiratorio_Con_Fatiga",
+        "Disnea_Con_Fatiga"
+      ],
+      "consecuente": "Respiratorio_Disneico"
+    },
+    {
+      "id": "R47",
+      "nivel": 2,
+      "antecedentes": [
+        "Cuadro_Respiratorio_Sistemico",
+        "Cuadro_Respiratorio_Sistemico_Con_Disnea"
+      ],
+      "consecuente": "Respiratorio_Sistemico_Intenso"
+    },
+    {
+      "id": "R48",
+      "nivel": 2,
+      "antecedentes": [
+        "Hipotension_Sintomatica",
+        "Fiebre_Con_Hipotension"
+      ],
+      "consecuente": "Inestabilidad_Con_Fiebre"
+    },
+    {
+      "id": "R49",
+      "nivel": 2,
+      "antecedentes": [
+        "Riesgo_Cardiometabolico",
+        "Riesgo_Cardiovascular_Elevado"
+      ],
+      "consecuente": "Factores_Riesgo_Cardiovascular"
+    },
+    {
+      "id": "R50",
+      "nivel": 2,
+      "antecedentes": [
+        "Disnea_Adulto_Mayor",
+        "Fatiga_Adulto_Mayor"
+      ],
+      "consecuente": "Respiratorio_Adulto_Mayor"
+    },
+    {
+      "id": "R51",
+      "nivel": 2,
+      "antecedentes": [
+        "Nasal",
+        "Cuadro_Respiratorio_Con_Fatiga"
+      ],
+      "consecuente": "Catarral"
+    },
+    {
+      "id": "R52",
+      "nivel": 2,
+      "antecedentes": [
+        "Febril_Mialgico",
+        "Malestar_Febril"
+      ],
+      "consecuente": "Pseudogripal"
+    },
+    {
+      "id": "R53",
+      "nivel": 2,
+      "antecedentes": [
+        "Tos_Productiva",
+        "Cuadro_Febril_Respiratorio"
+      ],
+      "consecuente": "Bronquial_Infeccioso"
+    },
+    {
+      "id": "R54",
+      "nivel": 2,
+      "antecedentes": [
+        "Broncoespasmo",
+        "Compromiso_Respiratorio"
+      ],
+      "consecuente": "Obstructivo_Bronquial"
+    },
+    {
+      "id": "R55",
+      "nivel": 2,
+      "antecedentes": [
+        "Febril_Pleuritico",
+        "Cuadro_Respiratorio_Febril_Con_Disnea"
+      ],
+      "consecuente": "Neumonico_Sospechado"
+    },
+    {
+      "id": "R56",
+      "nivel": 2,
+      "antecedentes": [
+        "Faringeo_Febril",
+        "Malestar_Febril"
+      ],
+      "consecuente": "Faringeo"
+    },
+    {
+      "id": "R57",
+      "nivel": 2,
+      "antecedentes": [
+        "Signo_Hipoperfusion",
+        "Disnea_Con_Hipotension"
+      ],
+      "consecuente": "Sindrome_Hipoperfusion"
+    },
+    {
+      "id": "R58",
+      "nivel": 2,
+      "antecedentes": [
+        "Signo_Choque_Etat"
+      ],
+      "consecuente": "Sindrome_Choque_Etat"
+    },
+    {
+      "id": "R59",
+      "nivel": 2,
+      "antecedentes": [
+        "Neurologico",
+        "Focal_Neurologico"
+      ],
+      "consecuente": "Deficit_Neurologico_Agudo"
+    },
+    {
+      "id": "R60",
+      "nivel": 2,
+      "antecedentes": [
+        "Dolor_Toracico_Alarma",
+        "Riesgo_Cardiometabolico"
+      ],
+      "consecuente": "Dolor_Toracico_Cardiovascular"
+    },
+    {
+      "id": "R61",
+      "nivel": 2,
+      "antecedentes": [
+        "Deshidratacion_ETAT_A"
+      ],
+      "consecuente": "Deshidratacion_Grave_ETAT"
+    },
+    {
+      "id": "R62",
+      "nivel": 2,
+      "antecedentes": [
+        "Deshidratacion_ETAT_B"
+      ],
+      "consecuente": "Deshidratacion_Grave_ETAT"
+    },
+    {
+      "id": "R63",
+      "nivel": 2,
+      "antecedentes": [
+        "Deshidratacion_ETAT_C"
+      ],
+      "consecuente": "Deshidratacion_Grave_ETAT"
+    },
+    {
+      "id": "R64",
+      "nivel": 2,
+      "antecedentes": [
+        "Reaccion_Alergica_Via_Aerea",
+        "Signo_Estridor"
+      ],
+      "consecuente": "Reaccion_Alergica_Grave"
+    },
+    {
+      "id": "R65",
+      "nivel": 2,
+      "antecedentes": [
+        "Disnea_Severa"
+      ],
+      "consecuente": "Insuficiencia_Respiratoria_Potencial"
+    },
+    {
+      "id": "R66",
+      "nivel": 2,
+      "antecedentes": [
+        "Signo_Hipoxia_Critica"
+      ],
+      "consecuente": "Sindrome_Hipoxia_Critica"
+    },
+    {
+      "id": "R67",
+      "nivel": 2,
+      "antecedentes": [
+        "Convulsion"
+      ],
+      "consecuente": "Sindrome_Emergencia_Neurologica"
+    },
+    {
+      "id": "R68",
+      "nivel": 2,
+      "antecedentes": [
+        "Signo_Coma"
+      ],
+      "consecuente": "Sindrome_Emergencia_Neurologica"
+    },
+    {
+      "id": "R69",
+      "nivel": 2,
+      "antecedentes": [
+        "Obstruccion"
+      ],
+      "consecuente": "Compromiso_Via_Aerea"
+    },
+    {
+      "id": "R70",
+      "nivel": 2,
+      "antecedentes": [
+        "Apnea"
+      ],
+      "consecuente": "Compromiso_Via_Aerea"
+    },
+    {
+      "id": "R71",
+      "nivel": 2,
+      "antecedentes": [
+        "Respiracion_Agonal"
+      ],
+      "consecuente": "Compromiso_Via_Aerea"
+    },
+    {
+      "id": "R72",
+      "nivel": 2,
+      "antecedentes": [
+        "Hemorragia"
+      ],
+      "consecuente": "Hemorragico_Critico"
+    },
+    {
+      "id": "R73",
+      "nivel": 3,
+      "antecedentes": [
+        "Pseudogripal",
+        "Tos"
+      ],
+      "consecuente": "Influenza"
+    },
+    {
+      "id": "R74",
+      "nivel": 3,
+      "antecedentes": [
+        "Catarral",
+        "Rinorrea"
+      ],
+      "consecuente": "Resfriado_Comun"
+    },
+    {
+      "id": "R75",
+      "nivel": 3,
+      "antecedentes": [
+        "Bronquial_Infeccioso",
+        "Expectoracion"
+      ],
+      "consecuente": "Bronquitis"
+    },
+    {
+      "id": "R76",
+      "nivel": 3,
+      "antecedentes": [
+        "Neumonico_Sospechado",
+        "Dificultad_Respiratoria"
+      ],
+      "consecuente": "Neumonia"
+    },
+    {
+      "id": "R77",
+      "nivel": 3,
+      "antecedentes": [
+        "Obstructivo_Bronquial",
+        "Antecedente_Asma"
+      ],
+      "consecuente": "Exacerbacion_Asma"
+    },
+    {
+      "id": "R78",
+      "nivel": 3,
+      "antecedentes": [
+        "Obstructivo_Bronquial",
+        "Antecedente_EPOC"
+      ],
+      "consecuente": "Exacerbacion_EPOC"
+    },
+    {
+      "id": "R79",
+      "nivel": 3,
+      "antecedentes": [
+        "Respiratorio_Febril",
+        "Faringeo_Febril"
+      ],
+      "consecuente": "Infeccion_Respiratoria"
+    },
+    {
+      "id": "R80",
+      "nivel": 3,
+      "antecedentes": [
+        "Respiratorio_Sistemico_Intenso",
+        "Febril_Mialgico"
+      ],
+      "consecuente": "Enfermedad_Respiratoria_Viral"
+    },
+    {
+      "id": "R81",
+      "nivel": 3,
+      "antecedentes": [
+        "Respiratorio_Adulto_Mayor",
+        "Respiratorio_Disneico"
+      ],
+      "consecuente": "Cuadro_Respiratorio_Adulto_Mayor"
+    },
+    {
+      "id": "R82",
+      "nivel": 3,
+      "antecedentes": [
+        "Inestabilidad_Con_Fiebre",
+        "Sindrome_Hipoperfusion"
+      ],
+      "consecuente": "Infeccion_Con_Compromiso_Circulatorio"
+    },
+    {
+      "id": "R83",
+      "nivel": 3,
+      "antecedentes": [
+        "Deficit_Neurologico_Agudo"
+      ],
+      "consecuente": "Evento_Neurologico_Agudo"
+    },
+    {
+      "id": "R84",
+      "nivel": 3,
+      "antecedentes": [
+        "Dolor_Toracico_Cardiovascular"
+      ],
+      "consecuente": "Evento_Cardiaco_Agudo"
+    },
+    {
+      "id": "R85",
+      "nivel": 3,
+      "antecedentes": [
+        "Faringeo"
+      ],
+      "consecuente": "Faringitis"
+    },
+    {
+      "id": "R86",
+      "nivel": 3,
+      "antecedentes": [
+        "Sindrome_Choque_Etat",
+        "Contexto_Pediatrico"
+      ],
+      "consecuente": "Choque"
+    },
+    {
+      "id": "R87",
+      "nivel": 3,
+      "antecedentes": [
+        "Deshidratacion_Grave_ETAT"
+      ],
+      "consecuente": "Deshidratacion_Grave"
+    },
+    {
+      "id": "R88",
+      "nivel": 3,
+      "antecedentes": [
+        "Reaccion_Alergica_Grave"
+      ],
+      "consecuente": "Anafilaxia"
+    },
+    {
+      "id": "R89",
+      "nivel": 3,
+      "antecedentes": [
+        "Insuficiencia_Respiratoria_Potencial",
+        "Neurologico"
+      ],
+      "consecuente": "Fallo_Respiratorio"
+    },
+    {
+      "id": "R90",
+      "nivel": 3,
+      "antecedentes": [
+        "Sindrome_Hipoxia_Critica"
+      ],
+      "consecuente": "Hipotesis_Hipoxia_Critica"
+    },
+    {
+      "id": "R91",
+      "nivel": 3,
+      "antecedentes": [
+        "Sindrome_Emergencia_Neurologica"
+      ],
+      "consecuente": "Hipotesis_Emergencia_Neurologica"
+    },
+    {
+      "id": "R92",
+      "nivel": 3,
+      "antecedentes": [
+        "Compromiso_Via_Aerea"
+      ],
+      "consecuente": "Emergencia_Via_Aerea"
+    },
+    {
+      "id": "R93",
+      "nivel": 3,
+      "antecedentes": [
+        "Hemorragico_Critico"
+      ],
+      "consecuente": "Hemorragia_Critica"
+    },
+    {
+      "id": "R94",
+      "nivel": 3,
+      "antecedentes": [
+        "Respiratorio_Febril",
+        "Disnea_Febril"
+      ],
+      "consecuente": "Infeccion_Respiratoria_Con_Disnea"
+    },
+    {
+      "id": "R95",
+      "nivel": 4,
+      "antecedentes": [
+        "Neumonia",
+        "Disnea_Severa"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R96",
+      "nivel": 4,
+      "antecedentes": [
+        "Influenza",
+        "Signo_Hipoxia_Critica"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R97",
+      "nivel": 4,
+      "antecedentes": [
+        "Exacerbacion_Asma",
+        "Disnea_Severa"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R98",
+      "nivel": 4,
+      "antecedentes": [
+        "Exacerbacion_EPOC",
+        "Signo_Hipoxia_Critica"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R99",
+      "nivel": 4,
+      "antecedentes": [
+        "Fallo_Respiratorio"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R100",
+      "nivel": 4,
+      "antecedentes": [
+        "Hipotesis_Hipoxia_Critica"
+      ],
+      "consecuente": "Alerta_Roja_Respiratoria"
+    },
+    {
+      "id": "R101",
+      "nivel": 4,
+      "antecedentes": [
+        "Emergencia_Via_Aerea"
+      ],
+      "consecuente": "Alerta_Roja_Via_Aerea"
+    },
+    {
+      "id": "R102",
+      "nivel": 4,
+      "antecedentes": [
+        "Choque"
+      ],
+      "consecuente": "Alerta_Roja_Circulatoria"
+    },
+    {
+      "id": "R103",
+      "nivel": 4,
+      "antecedentes": [
+        "Infeccion_Con_Compromiso_Circulatorio"
+      ],
+      "consecuente": "Alerta_Roja_Circulatoria"
+    },
+    {
+      "id": "R104",
+      "nivel": 4,
+      "antecedentes": [
+        "Hipotesis_Emergencia_Neurologica"
+      ],
+      "consecuente": "Alerta_Roja_Neurologica"
+    },
+    {
+      "id": "R105",
+      "nivel": 4,
+      "antecedentes": [
+        "Evento_Neurologico_Agudo"
+      ],
+      "consecuente": "Alerta_Roja_Neurologica"
+    },
+    {
+      "id": "R106",
+      "nivel": 4,
+      "antecedentes": [
+        "Evento_Cardiaco_Agudo"
+      ],
+      "consecuente": "Alerta_Roja_Cardiovascular"
+    },
+    {
+      "id": "R107",
+      "nivel": 4,
+      "antecedentes": [
+        "Anafilaxia"
+      ],
+      "consecuente": "Alerta_Roja_Alergica"
+    },
+    {
+      "id": "R108",
+      "nivel": 4,
+      "antecedentes": [
+        "Hemorragia_Critica"
+      ],
+      "consecuente": "Alerta_Roja_Hemorragica"
+    },
+    {
+      "id": "R109",
+      "nivel": 4,
+      "antecedentes": [
+        "Deshidratacion_Grave",
+        "Contexto_Pediatrico"
+      ],
+      "consecuente": "Alerta_Roja_Deshidratacion_Pediatrica"
+    },
+    {
+      "id": "R110",
+      "nivel": 4,
+      "antecedentes": [
+        "Influenza",
+        "Respiratorio_Disneico"
+      ],
+      "consecuente": "Alerta_Amarilla_Respiratoria"
+    },
+    {
+      "id": "R111",
+      "nivel": 4,
+      "antecedentes": [
+        "Bronquitis",
+        "Respiratorio_Disneico"
+      ],
+      "consecuente": "Alerta_Amarilla_Respiratoria"
+    },
+    {
+      "id": "R112",
+      "nivel": 4,
+      "antecedentes": [
+        "Cuadro_Respiratorio_Adulto_Mayor"
+      ],
+      "consecuente": "Alerta_Amarilla_Respiratoria"
+    },
+    {
+      "id": "R113",
+      "nivel": 4,
+      "antecedentes": [
+        "Infeccion_Respiratoria_Con_Disnea"
+      ],
+      "consecuente": "Alerta_Amarilla_Respiratoria"
+    },
+    {
+      "id": "R114",
+      "nivel": 4,
+      "antecedentes": [
+        "Faringitis"
+      ],
+      "consecuente": "Alerta_Evaluacion_No_Urgencia_Automatica"
+    },
+    {
+      "id": "R115",
+      "nivel": 4,
+      "antecedentes": [
+        "Resfriado_Comun"
+      ],
+      "consecuente": "Alerta_Evaluacion_No_Urgencia_Automatica"
+    },
+    {
+      "id": "R116",
+      "nivel": 4,
+      "antecedentes": [
+        "Enfermedad_Respiratoria_Viral"
+      ],
+      "consecuente": "Alerta_Evaluacion_Clinica"
+    },
+    {
+      "id": "R117",
+      "nivel": 4,
+      "antecedentes": [
+        "Infeccion_Respiratoria"
+      ],
+      "consecuente": "Alerta_Evaluacion_Clinica"
+    },
+    {
+      "id": "R118",
+      "nivel": 3,
+      "antecedentes": [
+        "Dolor_Toracico_Alarma",
+        "Factores_Riesgo_Cardiovascular"
+      ],
+      "consecuente": "Dolor_Toracico_Cardiovascular"
+    }
+  ],
+  "convencion_nombres": "Todos los literales usan Mayúscula_Inicial con guiones bajos y sin tildes (ej. Dificultad_Respiratoria)."
+}

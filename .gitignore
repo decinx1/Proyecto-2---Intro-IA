@@ -1,0 +1,6 @@
+# Documentación del proyecto (informe, enunciado e imágenes): no se versiona
+documentacion/
+
+# Python
+__pycache__/
+*.pyc
